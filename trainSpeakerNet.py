@@ -27,22 +27,22 @@ parser.add_argument('--max_epoch',      type=int,   default=500,    help='Maximu
 parser.add_argument('--trainfunc',      type=str,   default="aamsoftmaxproto", help='Loss function')
 
 ## Optimizer
-parser.add_argument('--optimizer',      type=str,   default="adam", help='sgd or adam')
+parser.add_argument('--optimizer',      type=str,   default="adamW", help='sgd or adam')
 parser.add_argument('--scheduler',      type=str,   default="cycliclr", help='Learning rate scheduler [cosine_annealing_warmup_restarts, steplr, or cycliclr]')
-parser.add_argument('--weight_decay',   type=float, default=2e-5,   help='Weight decay in the optimizer')
+parser.add_argument('--weight_decay',   type=float, default=1e-7,   help='Weight decay in the optimizer')
 parser.add_argument('--lr',             type=float, default=0.001,  help='StepLR sched: Learning rate')
 parser.add_argument("--lr_decay",       type=float, default=0.50,   help='StepLR sched: Learning rate decay')
 parser.add_argument("--lr_decay_interval",type=int, default=4,      help='StepLR sched: Learning rate decay every [lr_interval] epochs')
-parser.add_argument('--lr_t0',          type=int,   default=25,     help='Cosine sched: First cycle step size')
+parser.add_argument('--lr_t0',          type=int,   default=25*1019,     help='Cosine sched: First cycle step size')
 parser.add_argument('--lr_tmul',        type=float, default=1.0,    help='Cosine sched: Cycle steps magnification.')
 parser.add_argument('--lr_max',         type=float, default=1e-3,   help='Cosine sched: First cycle max learning rate')
-parser.add_argument('--lr_min',         type=float, default=0,      help='Cosine sched: First cycle min learning rate')
-parser.add_argument('--lr_wstep',       type=int,   default=0,      help='Cosine sched: Linear warmup step size')
-parser.add_argument('--lr_gamma',       type=float, default=0.8,    help='Cosine sched: Decrease rate of max learning rate by cycle')
+parser.add_argument('--lr_min',         type=float, default=1e-8,   help='Cosine sched: First cycle min learning rate')
+parser.add_argument('--lr_wstep',       type=int,   default=10*1019,     help='Cosine sched: Linear warmup step size')
+parser.add_argument('--lr_gamma',       type=float, default=0.5,    help='Cosine sched: Decrease rate of max learning rate by cycle')
 parser.add_argument("--lr_cyclic_min",  type=float, default=1e-8,   help='CyclicLR sched: Minimun learning rate')
 parser.add_argument("--lr_cyclic_max",  type=float, default=1e-3,   help='CyclicLR sched: Maximun learning rate')
-parser.add_argument('--lr_up_size',     type=int,   default=10,     help='CyclicLR sched: Up cycle size')
-parser.add_argument('--lr_down_size',   type=int,   default=15,     help='CyclicLR sched: Down cycle size')
+parser.add_argument('--lr_up_size',     type=int,   default=10*1019,     help='CyclicLR sched: Up cycle size')
+parser.add_argument('--lr_down_size',   type=int,   default=15*1019,     help='CyclicLR sched: Down cycle size')
 parser.add_argument('--lr_mode',        type=str,   default='triangular2', help='CyclicLR sched: Mode: triangular, triangular2, or exp_range')
 parser.add_argument('--swa',            dest='swa', action='store_true', help='Stochastic weight average')
 parser.add_argument('--swa_start',      type=int,   default=26,     help='Stochastic weight average starting point')
@@ -142,7 +142,9 @@ def main_worker(gpu, ngpus_per_node, args):
         trainer.loadParameters(modelfiles[-1])
         print("Model {} loaded from previous state!".format(modelfiles[-1]))
         it = int(os.path.splitext(os.path.basename(modelfiles[-1]))[0][5:]) + 1
-    for ii in range(1,it):
+    #for ii in range(1,it):
+    #    trainer.__scheduler__.step()
+    for ii in range(1,it * 1019):
         trainer.__scheduler__.step()
     
     ## Evaluation code - must run on single GPU
